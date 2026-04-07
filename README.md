@@ -1,1 +1,1 @@
-# projeto-avaliativo
+# Projeto Avaliativo - Sistema Web de Gerenciamento de Atividades e Avaliações para Escolas
