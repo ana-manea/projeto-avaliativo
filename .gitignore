@@ -1,0 +1,36 @@
+# Dependências
+/vendor/
+/node_modules/
+
+# Ambiente e credenciais
+.env
+.env.*
+!.env.example
+
+# Uploads de usuários
+/public/uploads/*
+!/public/uploads/.gitkeep
+!/public/uploads/avatars/.gitkeep
+
+# Logs e cache
+/storage/logs/*.log
+*.log
+/cache/
+/tmp/
+
+# Builds
+/dist/
+/build/
+/coverage/
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Backups
+*.bak
+*.old
+*.zip
