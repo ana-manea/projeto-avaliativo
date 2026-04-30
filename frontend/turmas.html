@@ -1,0 +1,28 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Turmas - Avalia</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="container page">
+        <div class="page-actions">
+            <h1>TURMAS</h1>
+            <a class="btn btn-primary" href="turma-form.html">+ Nova Turma</a>
+        </div>
+        <div id="lista"></div>
+        <div id="alunosTurma"></div>
+    </main>
+    
+    <script src="../assets/js/frontend.js"></script>
+    <script>
+        let items=[];async function load(){items=(await api('turmas')).items||[];render()}function render(){lista.innerHTML=table(['Nome','Escola','Série/Ano','Turno','Professor','Professores','Alunos','Status','Ações'],items.map(t=>`<tr><td>${esc(t.nome)}</td><td>${esc(t.escola_nome||'-')}</td><td>${esc(t.serie_ano||'-')}</td><td>${esc(t.turno||'-')}</td><td>${esc(t.professor_nome||'-')}</td><td>${t.professores_count||0}</td><td>${t.alunos_count||0}</td><td>${t.ativo==1?statusBadge('ativo'):statusBadge('inativo')}</td><td><button class="btn btn-sm btn-secondary" onclick="verAlunos(${t.id},'${esc(t.nome)}')">Ver turma</button> <a class="btn btn-sm btn-secondary" href="turma-form.html?id=${t.id}">Editar</a> <button class="btn btn-sm btn-warning" onclick="statusTurma(${t.id},${t.ativo==1?0:1})">${t.ativo==1?'Desativar':'Ativar'}</button> <button class="btn btn-sm btn-danger" ${t.ativo==1?'disabled title="Desative a turma antes de excluir"':''} onclick="del(${t.id},${t.ativo})">Excluir</button></td></tr>`))}async function verAlunos(id,nome){const r=await api('turmas/'+id+'/alunos');alunosTurma.innerHTML='<h2 class="mt-4">Alunos da turma '+nome+'</h2>'+table(['Aluno','Matrícula','Usuário','Email','Status'],(r.items||[]).map(a=>`<tr><td>${esc(a.nome_completo)}</td><td>${esc(a.matricula||'-')}</td><td>${esc(a.usuario||'-')}</td><td>${esc(a.email||'-')}</td><td>${a.ativo==1?statusBadge('ativo'):statusBadge('inativo')}</td></tr>`));alunosTurma.scrollIntoView({behavior:'smooth'})}async function statusTurma(id,ativo){const acao=ativo?'ativar':'desativar';if(!(await confirmAction(`Deseja realmente ${acao} esta turma?`,ativo?'Ativar turma':'Desativar turma')))return;try{await api('turmas/'+id+'/status',{method:'POST',body:{ativo}});flash(ativo?'Turma ativada.':'Turma desativada.');load()}catch(e){flash(e.message,'error')}}async function del(id,ativo){const item=items.find(x=>Number(x.id)===Number(id));if(Number(ativo)===1 || (item&&Number(item.ativo)===1))return flash('Desative a turma antes de excluir.','error');if(await confirmAction('Excluir definitivamente esta turma inativa? Esta ação não pode ser desfeita.','Excluir turma')){try{await api('turmas/'+id,{method:'DELETE'});flash('Turma excluída.');load()}catch(e){flash(e.message,'error')}}}requireAdmin().then(load);
+    </script>
+</body>
+</html>
