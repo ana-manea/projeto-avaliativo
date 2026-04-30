@@ -1,0 +1,154 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Avalia - Perfil</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="main">
+        <div class="container">
+            <div class="page-header">
+                <div>
+                    <h1>Meu Perfil</h1>
+                    <p class="text-muted">Gerencie seus dados, senha e preferências de acessibilidade.</p>
+                </div>
+            </div>
+            <div class="profile-grid">
+                <div class="card profile-card">
+                    <div class="profile-header">
+                        <div id="perfilAvatar" class="profile-avatar">A</div>
+                        <div>
+                            <h2 id="perfilNome">Administrador</h2>
+                            <p id="perfilUsuario" class="text-muted">@admin</p>
+                            <span id="perfilNivel" class="badge">Admin</span>
+                        </div>
+                    </div>
+                    <h3>Dados pessoais</h3>
+                    <form id="formPerfil" class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nome completo *</label>
+                            <input name="nome" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Login</label>
+                            <input name="usuario" class="form-control" disabled>
+                            <small>O login não pode ser alterado aqui.</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">E-mail</label>
+                            <input name="email" type="email" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Telefone</label>
+                            <input name="telefone" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Membro desde</label>
+                            <input name="criado_em" class="form-control" disabled>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary">Salvar dados</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card profile-card">
+                    <h3>Alterar senha</h3>
+                    <form id="formSenha" class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Senha atual *</label>
+                            <input name="senha_atual" type="password" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nova senha *</label>
+                            <input name="nova_senha" type="password" class="form-control" minlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirmar nova senha *</label>
+                            <input name="confirmar_senha" type="password" class="form-control" minlength="6" required>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primary">Alterar senha</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card profile-card preferences-card">
+                <h3>Preferências</h3>
+                <form id="formPreferencias" class="form-grid form-grid-3">
+                    <div class="form-group">
+                        <label class="form-label">Tema</label>
+                        <select name="tema" class="form-control">
+                            <option value="claro">Modo Claro</option>
+                            <option value="escuro">Modo Escuro</option>
+                            <option value="daltonico">Daltônico</option>
+                            <option value="alto_contraste">Alto contraste</option>
+                        </select>
+                    </div>
+                    <div class="form-group avatar-preference">
+                        <label class="form-label">Avatar</label>
+                        <div class="avatar-edit-row">
+                            <div id="avatarPreview" class="profile-avatar">A</div>
+                            <div>
+                                <label class="form-label">Cor do avatar</label>
+                                <input name="avatar_cor" type="color" class="form-control" value="#9333ea">
+                                <label class="form-label">Imagem do avatar</label>
+                                <input name="avatar_imagem_file" type="file" class="form-control" accept="image/*">
+                                <small>Se nenhuma imagem for enviada, o avatar usa suas iniciais.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tamanho da fonte</label>
+                        <select name="font_size" class="form-control">
+                            <option value="normal">Normal</option>
+                            <option value="grande">Grande</option>
+                            <option value="maior">Muito grande</option>
+                        </select>
+                    </div>
+                    <div class="form-check-row">
+                        <label>
+                            <input name="vlibras_ativo" type="checkbox" value="1"> Ativar VLibras
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary">Salvar preferências</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../assets/js/frontend.js"></script>
+    <script>
+        let perfilAtual=null;
+        
+        function preencher(u){ perfilAtual=u; perfilNome.textContent=u.nome||''; perfilUsuario.textContent='@'+(u.usuario||''); perfilNivel.textContent=(u.nivel||'').replace(/^./,c=>c.toUpperCase()); const ini=initials(u.nome); perfilAvatar.textContent=ini; avatarPreview.textContent=ini; perfilAvatar.style.background=u.avatar_cor||'#9333ea'; avatarPreview.style.background=u.avatar_cor||'#9333ea'; formPerfil.nome.value=u.nome||''; formPerfil.usuario.value=u.usuario||''; formPerfil.email.value=u.email||''; formPerfil.telefone.value=u.telefone||''; formPerfil.criado_em.value=formatDate(u.criado_em); formPreferencias.tema.value=localStorage.getItem('avalia_tema')||u.tema||'claro'; formPreferencias.avatar_cor.value=u.avatar_cor||'#9333ea'; formPreferencias.font_size.value=u.font_size||'normal'; formPreferencias.vlibras_ativo.checked=Number(u.vlibras_ativo||0)===1; formPreferencias.alto_contraste.checked=Number(u.alto_contraste||0)===1; }
+        
+        function prefData(){ const fd=new FormData(formPreferencias); return {tema:fd.get('tema'), avatar_cor:fd.get('avatar_cor'), font_size:fd.get('font_size'), vlibras_ativo:formPreferencias.vlibras_ativo.checked?1:0, alto_contraste:formPreferencias.alto_contraste.checked?1:0}; }
+        
+        function dadosData(){ return Object.fromEntries(new FormData(formPerfil)); }
+        
+        async function salvarPerfil(extra={}){const data={...dadosData(), ...prefData(), ...extra}; if(data.tema) localStorage.setItem('avalia_tema', data.tema); if(data.font_size) localStorage.setItem('avalia_font_size', data.font_size); const r=await api('perfil',{method:'POST',body:data}); preencher(r.user); applyPreferences(r.user); renderHeader(r.user);}
+        
+        function formatDate(v){ if(!v) return ''; const d=String(v).slice(0,10); const [y,m,day]=d.split('-'); return day&&m&&y ? `${day}/${m}/${y}` : d; } 
+        
+        formPerfil.addEventListener('submit',async e=>{ e.preventDefault(); try{ await salvarPerfil(); flash('Dados atualizados.'); }catch(err){ flash(err.message,'error'); }});
+        
+        formPreferencias.addEventListener('submit',async e=>{ e.preventDefault(); try{ await salvarPerfil(); flash('Preferências atualizadas.'); }catch(err){ flash(err.message,'error'); }});
+        
+        formSenha.addEventListener('submit',async e=>{ e.preventDefault(); const data=Object.fromEntries(new FormData(e.target)); if((data.nova_senha||'').length<6) return flash('A nova senha deve ter no mínimo 6 caracteres.','error'); if(data.nova_senha!==data.confirmar_senha) return flash('As senhas não conferem.','error'); try{ await api('perfil/senha',{method:'POST',body:data}); e.target.reset(); flash('Senha alterada.'); }catch(err){ flash(err.message,'error'); }});
+        
+        formPreferencias.avatar_cor.addEventListener('input', e=>{ perfilAvatar.style.background=e.target.value; avatarPreview.style.background=e.target.value; });
+        
+        formPreferencias.tema.addEventListener('change', e=>setTheme(e.target.value));
+        
+        requireAdmin().then(async(user)=>{ if(!user) return; const r=await api('perfil'); preencher(r.user); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Dashboard - Avalia</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="container page">
+        <h1>PAINEL ADMINISTRATIVO</h1>
+        <p class="text-muted">Acesso geral de cadastro, gerenciamento e acessibilidade.</p>
+        <div id="conteudo"></div>
+    </main>
+    
+    <script src="../assets/js/frontend.js"></script>
+    <script>
+        function cards(items){return '<div class="dashboard-cards">'+items.map(i=>`<div class="stat-card"><div class="stat-number">${i[0]??0}</div><div class="stat-label">${i[1]}</div>${i[2]||''}</div>`).join('')+'</div>'}
+        requireAdmin().then(async()=>{const r=await api('dashboard');conteudo.innerHTML=cards([[r.counts.escolas,'Instituições'],[r.counts.usuarios,'Usuários'],[r.counts.professores,'Professores'],[r.counts.alunos,'Alunos'],[r.counts.turmas,'Turmas'],[r.counts.disciplinas,'Disciplinas'],[r.counts.avaliacoes,'Avaliações'],[r.counts.pendentes,'Pendentes']])+`<h2 class="mt-4">Acesso rápido</h2><div class="quick-grid"><div class="card"><div class="card-body"><h3>Usuários</h3><p>Gerencie alunos, professores, moderadores e administradores.</p><a class="btn btn-primary" href="usuarios.html">Abrir</a></div></div><div class="card"><div class="card-body"><h3>Avaliações</h3><p>Veja avaliações, status, questões e resultados.</p><a class="btn btn-primary" href="avaliacoes.html">Abrir</a></div></div></div><h2 class="mt-4">Últimas avaliações</h2>`+table(['Título','Escola','Turma','Disciplina','Status','Data'],(r.ultimas||[]).map(a=>`<tr><td>${esc(a.titulo)}</td><td>${esc(a.escola||'-')}</td><td>${esc(a.turma||'-')}</td><td>${esc(a.disciplina||'-')}</td><td>${statusBadge(a.status)}</td><td>${esc(a.data_prova||'-')}</td></tr>`));});
+    </script>
+</body>
+</html>
