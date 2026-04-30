@@ -41,7 +41,7 @@ A interface continua em **HTML, CSS e JavaScript puro**. O PHP fica concentrado 
 O sistema valida CPF/CNPJ em duas etapas:
 
 - Validação local por dígitos verificadores no JavaScript e no PHP;
-- Vvalidação opcional pela API Invertexto quando `INVERTEXTO_TOKEN` estiver configurado no arquivo `.env`.
+- Validação opcional pela API Invertexto quando `INVERTEXTO_TOKEN` estiver configurado no arquivo `.env`.
 
 A API usada é `GET https://api.invertexto.com/v1/validator`, com os parâmetros `token`, `value` e opcionalmente `type` (`cpf` ou `cnpj`). A documentação da Invertexto informa que o endpoint retorna se o documento é válido ou inválido e que o plano gratuito possui limite mensal de requisições.
 
@@ -65,10 +65,13 @@ As consultas passam pela rota PHP `api/index.php?path=integracoes/...`, evitando
 `Localizado no caminho: database\banco_avalia.sql`
 
 3. Configure o `.env` com as informações do banco de dados e API:
-`DB_HOST=localhost
+`
+DB_HOST=localhost
 DB_NAME=banco_avalia
 DB_USER=root
 DB_PASS=
+`
+
 
 4. Acesse:
 `projeto-avaliativo/install.php`
@@ -78,8 +81,9 @@ DB_PASS=
 6. Clique em **Criar/carregar banco_avalia**.
 
 O instalador carrega automaticamente o arquivo:
-```txt
+```txt 
 database/banco_avalia.sql
+```
 
 7. Abra o arquivo `public\index.html` no navegador.
 
