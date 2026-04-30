@@ -1,0 +1,115 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Avaliação - Avalia</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .questoes-wrapper { margin-top: 24px; }
+        .questao-card { margin-bottom: 18px; border: 1px solid var(--cor-borda); border-radius: var(--radius-lg); background: var(--cor-fundo-card); box-shadow: var(--sombra-card); overflow: hidden; }
+        .questao-header { padding: 14px 18px; background: var(--cor-primaria-bg); color: var(--cor-primaria); font-weight: 800; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+        .questao-body { padding: 18px; }
+        .alternativas-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 12px; }\n    .questao-card.is-dissertativa .alternativas-wrapper, .questao-card.is-dissertativa .gabarito-wrapper { display:none; }\n    .valor-questao { font-weight:800; color: var(--cor-primaria); }
+        .alternativa-row { display: grid; grid-template-columns: 42px 1fr; gap: 8px; align-items: center; }
+        .alternativa-letra { width: 42px; height: 42px; border-radius: 999px; background: var(--cor-primaria-bg); color: var(--cor-primaria); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+        .form-actions-fixed { display:flex; gap:12px; align-items:center; margin-top: 22px; }
+        @media (max-width: 800px){ .alternativas-grid { grid-template-columns: 1fr; } .form-actions-fixed{flex-direction:column; align-items:stretch;} }
+    </style>
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="container page">
+        <div class="page-actions">
+            <h1 id="title">NOVA AVALIAÇÃO</h1>
+            <a class="btn btn-secondary" href="avaliacoes.html">Voltar</a>
+        </div>
+        <form id="form" class="card" autocomplete="off">
+            <div class="card-body">
+                <div class="form-grid-2">
+                    <label>Título<input class="form-control" name="titulo" required></label>
+                    <label>Turma<select class="form-control" name="turma_id" required></select></label>
+                    <label>Disciplina<select class="form-control" name="disciplina_id"></select></label>
+                    <label>Professor<select class="form-control" name="professor_id"></select></label>
+                    <label>Data<input id="dataProva" class="form-control" type="date" name="data_prova" required></label>
+                    <label>Quantidade de questões <input id="numeroQuestoes" class="form-control" type="number" min="1" max="100" name="numero_questoes" value="1" required></label>
+                    <label>Alternativas por questão<input id="alternativasPorQuestao" class="form-control" type="number" min="2" max="10" name="alternativas_por_questao" value="5"></label>
+                    <label>Peso<input class="form-control" type="number" step="0.01" min="0" name="peso" value="1">
+                    </label>
+                    <label>Status
+                        <select class="form-control" name="status">
+                            <option value="pendente">Pendente</option>
+                            <option value="em_andamento">Em andamento</option>
+                            <option value="correcao_pendente">Correção pendente</option>
+                            <option value="concluida">Concluída</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </label>
+                </div>
+                <label>Observações
+                    <textarea class="form-control" name="observacoes" rows="4"></textarea>
+                </label>
+                <section class="questoes-wrapper">
+                    <div class="page-actions" style="padding:0;margin-bottom:12px;">
+                        <div>
+                            <h2>Questões</h2>
+                            <p class="text-muted">Ao alterar a quantidade de questões, os campos abaixo são gerados automaticamente.</p>
+                        </div>
+                    </div>
+                    <div id="questoesContainer"></div>
+                </section>
+                <div class="form-actions-fixed">
+                    <button id="btnSalvar" class="btn btn-primary" type="submit">Salvar</button>
+                    <a class="btn btn-secondary" href="avaliacoes.html">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </main>
+    <script src="../assets/js/frontend.js"></script>
+    <script>
+        const id = new URLSearchParams(location.search).get('id');
+        const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        let questoesExistentes = [];
+        function normalizarDataParaInput(valor) {if (!valor) return ''; const v = String(valor).trim(); if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10); const br = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/); if (br) return `${br[3]}-${br[2]}-${br[1]}`; return v; }
+        
+        function valorPorQuestao() {const qtd = Math.max(1, Math.min(100, parseInt(form.numero_questoes.value || 1, 10))); return Number((10 / qtd).toFixed(2));}
+        
+        function criarQuestaoHTML(numero, dados = {}) {const altQtd = Math.max(2, Math.min(10, parseInt(form.alternativas_por_questao.value || 5, 10)));
+        
+        const alternativas = dados.alternativas || []; const altMap = {}; 
+        
+        alternativas.forEach(a => { altMap[String(a.letra || '').toUpperCase()] = a.texto || ''; }); const gabarito = String(dados.gabarito || '').toUpperCase(); const tipo = String(dados.tipo || 'objetiva').toLowerCase() === 'dissertativa' ? 'dissertativa' : 'objetiva'; const valor = valorPorQuestao();
+        
+        const opcoesGabarito = letras.slice(0, altQtd)
+        
+        .map(l => `<option value="${l}" ${gabarito === l ? 'selected' : ''}>${l}</option>`)
+        
+        .join('');
+        const alternativasHTML = letras.slice(0, altQtd).map(l => `<label class="alternativa-row"> <span class="alternativa-letra">${l}</span> <input class="form-control" data-alt="${l}" placeholder="Alternativa ${l}" value="${esc(altMap[l] || '')}"></label>`).join('');
+
+        return `<article class="questao-card ${tipo === 'dissertativa' ? 'is-dissertativa' : ''}" data-questao-index="${numero - 1}"> <div class="questao-header"> <span>Questão ${numero}</span> <span>Valor: <span class="valor-questao" data-campo="valor">${valor.toFixed(2)}</span> pts</span> </div> <div class="questao-body"> <div class="form-grid-2"> <label>Tipo da questão <select class="form-control" data-campo="tipo"> <option value="objetiva" ${tipo === 'objetiva' ? 'selected' : ''}>Objetiva</option> <option value="dissertativa" ${tipo === 'dissertativa' ? 'selected' : ''}>Dissertativa</option> </select> </label> </div> <label>Enunciado <textarea class="form-control" data-campo="enunciado" rows="3" placeholder="Digite o enunciado da questão">${esc(dados.enunciado || '')}</textarea> </label> <div class="form-grid-2 gabarito-wrapper"> <label>Gabarito <select class="form-control" data-campo="gabarito"> <option value="">Selecione</option> ${opcoesGabarito} </select> </label> </div> <div class="alternativas-wrapper"> <h3 class="mt-3">Alternativas</h3> <div class="alternativas-grid">${alternativasHTML}</div> </div> </div> </article>`;}
+        
+        function renderQuestoes() {const qtd = Math.max(1, Math.min(100, parseInt(form.numero_questoes.value || 1, 10))); form.numero_questoes.value = qtd; questoesContainer.innerHTML = ''; for (let i = 1; i <= qtd; i++) { questoesContainer.insertAdjacentHTML('beforeend', criarQuestaoHTML(i, questoesExistentes[i - 1] || {}));}}
+        
+        function lerQuestoesDaTela() {const valor = valorPorQuestao(); return [...document.querySelectorAll('.questao-card')].map((card, i) => { const tipo = card.querySelector('[data-campo="tipo"]')?.value || 'objetiva'; const alternativas = tipo === 'dissertativa' ? [] : [...card.querySelectorAll('[data-alt]')].map(input => ({letra: input.dataset.alt, texto: input.value.trim()})); return {numero: i + 1, tipo, enunciado: card.querySelector('[data-campo="enunciado"]').value.trim(), gabarito: tipo === 'dissertativa' ? '' : card.querySelector('[data-campo="gabarito"]').value, valor, alternativas};});}
+        
+        function guardarAntesDeRenderizar() {questoesExistentes = lerQuestoesDaTela();}
+
+        function hojeISO() {const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10);}
+
+        function aplicarDataMinima() {const hoje = hojeISO(); dataProva.min = hoje; if (dataProva.value && dataProva.value < hoje) setFieldError(dataProva, 'A data não pode ser anterior à data atual.'); else if (dataProva.value) clearFieldError(dataProva); }
+
+        function validarQuestoesAvaliacao() {let ok = true; document.querySelectorAll('.questao-card').forEach((card, idx) => {const tipo = card.querySelector('[data-campo="tipo"]')?.value || 'objetiva'; const enunciado = card.querySelector('[data-campo="enunciado"]'); if (!enunciado.value.trim()) { setFieldError(enunciado, `Informe o enunciado da questão ${idx + 1}.`); ok = false; } else clearFieldError(enunciado); if (tipo === 'objetiva') { const gabarito = card.querySelector('[data-campo="gabarito"]'); if (!gabarito.value) { setFieldError(gabarito, `Selecione o gabarito da questão ${idx + 1}.`); ok = false; } else clearFieldError(gabarito); const preenchidas = [...card.querySelectorAll('[data-alt]')].filter(i => i.value.trim()).length; if (preenchidas < 2) { const firstAlt = card.querySelector('[data-alt]'); setFieldError(firstAlt, `Preencha pelo menos 2 alternativas na questão ${idx + 1}.`);ok = false; }}}); if (!ok) flash('Corrija as questões destacadas antes de salvar.', 'error'); return ok;}
+        
+        async function load() {aplicarDataMinima(); const l = await api('lookups'); form.turma_id.innerHTML = '<option value="">Selecione</option>' + l.turmas.map(t => `<option value="${t.id}">${esc(t.escola ? t.escola + ' - ' + t.nome : t.nome)}</option>`).join(''); form.disciplina_id.innerHTML = '<option value="">Geral</option>' + l.disciplinas.map(d => `<option value="${d.id}">${esc(d.nome)}</option>`).join(''); form.professor_id.innerHTML = '<option value="">Selecione</option>' + l.professores.map(p => `<option value="${p.id}">${esc(p.nome)}</option>`).join(''); if (id) {title.textContent = 'EDITAR AVALIAÇÃO'; const r = await api('avaliacoes/' + id); const a = r.avaliacao || {}; Object.entries(a).forEach(([k, v]) => { if (form[k]) form[k].value = k === 'data_prova' ? normalizarDataParaInput(v) : (v ?? '');});questoesExistentes = r.questoes || []; form.numero_questoes.value = Math.max(parseInt(a.numero_questoes || 0, 10), questoesExistentes.length, 1); form.alternativas_por_questao.value = parseInt(a.alternativas_por_questao || 5, 10) || 5;} renderQuestoes();} 
+        numeroQuestoes.addEventListener('input', () => { guardarAntesDeRenderizar(); renderQuestoes(); }); alternativasPorQuestao.addEventListener('input', () => { guardarAntesDeRenderizar(); renderQuestoes(); }); dataProva.addEventListener('change', aplicarDataMinima); questoesContainer.addEventListener('change', e => { if (e.target.matches('[data-campo=\"tipo\"]')) { const card = e.target.closest('.questao-card'); card.classList.toggle('is-dissertativa', e.target.value === 'dissertativa');}});
+
+        form.addEventListener('submit', async e => {e.preventDefault(); aplicarDataMinima(); if (!validateForm(form) || !validarQuestoesAvaliacao()) return; btnSalvar.disabled = true; btnSalvar.textContent = 'Salvando...'; try {const payload = formData(form);payload.numero_questoes = parseInt(payload.numero_questoes || 0, 10);payload.alternativas_por_questao = parseInt(payload.alternativas_por_questao || 5, 10);payload.questoes = lerQuestoesDaTela();await api(id ? 'avaliacoes/' + id : 'avaliacoes', {method: id ? 'PUT' : 'POST',body: payload});location.href = 'avaliacoes.html';} catch (err) {flash(err.message, 'error');btnSalvar.disabled = false;btnSalvar.textContent = 'Salvar';}});
+        
+        requireAdmin().then(load);
+    </script>
+</body>
+</html>

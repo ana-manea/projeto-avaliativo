@@ -1,0 +1,63 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Avaliações - Avalia</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="container page">
+        <div class="page-actions">
+            <div>
+                <h1>AVALIAÇÕES</h1>
+                <p class="text-muted">Lista organizada por escola, turma e disciplina.</p>
+            </div>
+            <a class="btn btn-primary" href="avaliacao-form.html">+ Nova Avaliação</a>
+        </div>
+        <div id="filtros" class="card mb-3">
+            <div class="card-body form-grid-2">
+                <input id="busca" class="form-control" placeholder="Escola, título, turma, disciplina ou professor..." oninput="render()">
+                <select id="statusFiltro" class="form-control" onchange="render()">
+                    <option value="">Todos</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="em_andamento">Em andamento</option>
+                    <option value="correcao_pendente">Correção pendente</option>
+                    <option value="concluida">Concluída</option>
+                </select>
+            </div>
+        </div>
+        <div id="lista"></div>
+    </main>
+    
+    <script src="../assets/js/frontend.js"></script>
+    <script>
+        let items=[];
+
+        async function load(){items=(await api('avaliacoes')).items||[];render()}
+        
+        function render(){const q=(busca.value||'').toLowerCase(),st=statusFiltro.value; let arr=items.filter(a=>(!st||a.status===st)&&(`${a.escola||''} ${a.turma||''} ${a.disciplina||''} ${a.professor||''} ${a.titulo||''}`).toLowerCase().includes(q));lista.innerHTML=table(['Título','Escola','Turma','Disciplina','Professor','Data','Status','Cadastro','Ações'],arr.map(a=>`<tr><td>${esc(a.titulo)}</td><td>${esc(a.escola||'-')}</td><td>${esc(a.turma||'-')}</td><td>${esc(a.disciplina||'Geral')}</td><td>${esc(a.professor||'-')}</td><td>${esc(a.data_prova||'-')}</td><td>${statusBadge(a.status)}</td><td>${Number(a.ativo)===1?'<span class="badge badge-success">Ativa</span>':'<span class="badge badge-danger">Inativa</span>'}</td><td class="actions-cell"><a class="btn btn-sm btn-secondary" href="avaliacoes.html?id=${a.id}">Ver</a> <a class="btn btn-sm btn-secondary" href="avaliacao-form.html?id=${a.id}">Editar</a> <button class="btn btn-sm ${Number(a.ativo)===1?'btn-warning':'btn-success'}" onclick="toggleAvaliacao(${a.id}, ${Number(a.ativo)===1?1:0})">${Number(a.ativo)===1?'Inativar':'Ativar'}</button> <button class="btn btn-sm btn-danger" onclick="excluirAvaliacao(${a.id})">Excluir</button></td></tr>`))}
+        
+        function renderAlternativas(alts){return alts&&alts.length?`<ol class="alternativas-print" type="A">${alts.map(x=>`<li>${esc(x.texto||'')}</li>`).join('')}</ol>`:'';}
+        
+        function renderQuestoes(q){return q&&q.length?q.map(x=>{const tipo=String(x.tipo||'objetiva').toLowerCase(); return `<div class="card questao-print mb-2"><div class="card-body"><div class="questao-print-head"><strong>Questão ${esc(x.numero)} — ${tipo==='dissertativa'?'Dissertativa':'Objetiva'}</strong><span>${esc(x.valor||'-')} ponto(s)</span></div><p class="questao-enunciado">${esc(x.enunciado||'Questão')}</p>${tipo==='dissertativa'?'<div class="linha-resposta-print"></div>':renderAlternativas(x.alternativas)}<p class="gabarito-print"><strong>Gabarito:</strong> ${tipo==='dissertativa'?'Correção manual':esc(x.gabarito||'-')}</p></div></div>`;}).join(''):'<p class="text-muted">Sem questões cadastradas.</p>';}
+        
+        function imprimirProva(){window.print()}
+        
+        async function detalhe(id){const r=await api('avaliacoes/'+id),a=r.avaliacao; document.querySelector('.page-actions')?.remove(); filtros?.remove(); lista.innerHTML=`<section class="avaliacao-detalhe"><div class="page-actions no-print"><div><h1>${esc(a.titulo)}</h1><p class="text-muted">${esc(a.disciplina||'Geral')} - ${esc(a.turma||'-')} - ${esc(a.escola||'-')}</p></div><div class="actions-row"><button class="btn btn-primary" onclick="imprimirProva()">Imprimir prova</button><select id="statusDetalhe" class="form-control"><option value="pendente">Pendente</option><option value="em_andamento">Em andamento</option><option value="correcao_pendente">Correção pendente</option><option value="concluida">Concluída</option></select><button class="btn btn-primary" onclick="salvarStatus(${a.id})">Atualizar status</button><button class="btn ${Number(a.ativo)===1?'btn-warning':'btn-success'}" onclick="toggleAvaliacao(${a.id}, ${Number(a.ativo)===1?1:0})">${Number(a.ativo)===1?'Inativar':'Ativar'}</button><a class="btn btn-secondary" href="avaliacao-form.html?id=${a.id}">Editar</a><button class="btn btn-danger" onclick="excluirAvaliacao(${a.id})">Excluir</button><a class="btn btn-secondary" href="avaliacoes.html">Voltar</a></div></div><div class="print-header"><h1>${esc(a.titulo)}</h1><p><strong>Escola:</strong> ${esc(a.escola||'-')} &nbsp; | &nbsp; <strong>Turma:</strong> ${esc(a.turma||'-')} &nbsp; | &nbsp; <strong>Disciplina:</strong> ${esc(a.disciplina||'Geral')}</p><p><strong>Professor:</strong> ${esc(a.professor||'-')} &nbsp; | &nbsp; <strong>Data:</strong> ${esc(a.data_prova||'-')}</p><div class="print-aluno-linha"><span>Aluno(a): __________________________________________</span><span>Nota: ________</span></div></div><div class="dashboard-cards no-print"><div class="card"><div class="card-body"><p>Status</p>${statusBadge(a.status)}</div></div><div class="card"><div class="card-body"><p>Cadastro</p>${Number(a.ativo)===1?'<span class="badge badge-success">Ativa</span>':'<span class="badge badge-danger">Inativa</span>'}</div></div><div class="card"><div class="card-body"><p>Professor</p><strong>${esc(a.professor||'Sem professor')}</strong></div></div><div class="card"><div class="card-body"><p>Escola</p><strong>${esc(a.escola||'-')}</strong></div></div><div class="card"><div class="card-body"><p>Resultados</p><strong>${r.resultados.length}</strong></div></div></div><h2 class="mt-4">Questões</h2>${renderQuestoes(r.questoes)}<div class="no-print"><h2 class="mt-4">Resultados</h2>${table(['Aluno','Matrícula','Acertos','Erros','Nota'],r.resultados.map(x=>`<tr><td>${esc(x.aluno_nome)}</td><td>${esc(x.matricula||'-')}</td><td>${esc(x.acertos||0)}</td><td>${esc((x.total_questoes||0)-(x.acertos||0))}</td><td>${esc(x.nota||'-')}</td></tr>`))}</div></section>`;
+        statusDetalhe.value=a.status||'pendente';}
+        
+        async function salvarStatus(id){await api('avaliacoes/'+id+'/status',{method:'POST',body:{status:statusDetalhe.value}});detalhe(id)}
+        
+        async function toggleAvaliacao(id,ativoAtual){const ativa = Number(ativoAtual) === 1; const novoAtivo = ativa ? 0 : 1; const acao = ativa ? 'inativar' : 'ativar'; if(!(await confirmAction(`Deseja realmente ${acao} esta avaliação?`, ativa ? 'Inativar avaliação' : 'Ativar avaliação'))) return; const resp=await api('avaliacoes/'+id+'/status',{method:'POST',body:{ativo:novoAtivo}}); flash(Number(resp.ativo)===1 ? 'Avaliação ativada.' : 'Avaliação inativada.'); const idAtual=new URLSearchParams(location.search).get('id'); if(idAtual) detalhe(id); else load();}
+        
+        async function excluirAvaliacao(id){let item=items.find(x=>Number(x.id)===Number(id));if(!item){try{item=(await api('avaliacoes/'+id)).avaliacao}catch(e){}}if(item&&Number(item.ativo)===1)return flash('Inative a avaliação antes de excluir.','error');if(await confirmAction('Excluir definitivamente esta avaliação inativa? Esta ação não pode ser desfeita.','Excluir avaliação')){await api('avaliacoes/'+id,{method:'DELETE'});flash('Avaliação excluída.');location.href='avaliacoes.html'}}
+        
+        requireAdmin().then(()=>{const id=new URLSearchParams(location.search).get('id');id?detalhe(id):load();});
+    </script>
+</body>
+</html>
