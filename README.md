@@ -34,6 +34,24 @@ A interface continua em **HTML, CSS e JavaScript puro**. O PHP fica concentrado 
 - **ViaCEP**: usado no cadastro de escolas para preencher endereço pelo CEP.
 - **BrasilAPI CNPJ**: usado no cadastro de escolas para preencher dados da instituição pelo CNPJ.
 - **VLibras**: acessibilidade em Libras, controlada nas preferências do perfil.
+- **Validator**: usado no cadastro de usuários para validar o CPF.
+
+## Validação CPF/CNPJ com API Invertexto
+
+O sistema valida CPF/CNPJ em duas etapas:
+
+- Validação local por dígitos verificadores no JavaScript e no PHP;
+- Vvalidação opcional pela API Invertexto quando `INVERTEXTO_TOKEN` estiver configurado no arquivo `.env`.
+
+A API usada é `GET https://api.invertexto.com/v1/validator`, com os parâmetros `token`, `value` e opcionalmente `type` (`cpf` ou `cnpj`). A documentação da Invertexto informa que o endpoint retorna se o documento é válido ou inválido e que o plano gratuito possui limite mensal de requisições.
+
+Configure no `.env`:
+
+```env
+INVERTEXTO_TOKEN=seu_token_aqui
+```
+
+Sem token, o sistema continua bloqueando documentos matematicamente inválidos pela validação local.
 
 As consultas passam pela rota PHP `api/index.php?path=integracoes/...`, evitando dependência direta do JavaScript com serviços externos. Se uma API externa estiver indisponível, o cadastro manual continua funcionando.
 
@@ -44,16 +62,26 @@ As consultas passam pela rota PHP `api/index.php?path=integracoes/...`, evitando
 `git clone https://github.com/ana-manea/projeto-avaliativo.git`
 
 2. Importe o banco de dados:
-`Localizado no caminho: database\schema.sql`
+`Localizado no caminho: database\banco_avalia.sql`
 
-3. Configure o `.env` com as informações do banco de dados:
-`MYSQLHOST=localhost
-MYSQLDATABASE=avalia_db
-MYSQLUSER=root
-MYSQLPASSWORD=
-`
+3. Configure o `.env` com as informações do banco de dados e API:
+`DB_HOST=localhost
+DB_NAME=banco_avalia
+DB_USER=root
+DB_PASS=
 
-4. Abra o arquivo `public\index.html` no navegador.
+4. Acesse:
+`projeto-avaliativo/install.php`
+
+5. Confirme host, usuário e senha do MySQL.
+
+6. Clique em **Criar/carregar banco_avalia**.
+
+O instalador carrega automaticamente o arquivo:
+```txt
+database/banco_avalia.sql
+
+7. Abra o arquivo `public\index.html` no navegador.
 
 
 ## Autoras
