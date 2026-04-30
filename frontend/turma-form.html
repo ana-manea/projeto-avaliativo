@@ -16,11 +16,14 @@
             <h1 id="title">NOVA TURMA</h1>
             <a class="btn btn-secondary" href="turmas.html">Voltar</a>
         </div>
-        <form id="form" class="card">
+        <form id="form" class="card" novalidate>
             <div class="card-body">
                 <div class="form-grid-2">
                     <label>Nome<input class="form-control" name="nome" required></label>
-                    <label>Escola<select class="form-control" name="escola_id"></select></label>
+                    <label>Escola<span class="required"> *</span>
+                        <select class="form-control" name="escola_id" required></select>
+                        <span class="field-error-message" data-error-for="escola_id"></span>
+                    </label>
                     <label>Série/Ano<input class="form-control" name="serie_ano"></label>
                     <label>Turno<input class="form-control" name="turno"></label>
                     <label>Ano letivo<input class="form-control" name="ano_letivo" value="2026"></label>
@@ -41,7 +44,65 @@
     
     <script src="../assets/js/frontend.js"></script>
     <script>
-        const id=new URLSearchParams(location.search).get('id');async function load(){const l=await api('lookups');form.escola_id.innerHTML='<option value="">Selecione</option>'+l.escolas.map(e=>`<option value="${e.id}">${esc(e.nome)}</option>`).join('');form.professor_id.innerHTML='<option value="">Selecione</option>'+l.professores.map(p=>`<option value="${p.id}">${esc(p.nome)}</option>`).join('');if(id){title.textContent='EDITAR TURMA';const r=await api('turmas/'+id);Object.entries(r.item).forEach(([k,v])=>{if(form[k])form[k].value=v??''})}}form.addEventListener('submit',async e=>{e.preventDefault();try{await api(id?'turmas/'+id:'turmas',{method:id?'PUT':'POST',body:formData(form)});location.href='turmas.html'}catch(err){flash(err.message,'error')}});requireAdmin().then(load);
+        const id = new URLSearchParams(location.search).get('id');
+
+        function setFieldError(field, message) {
+            if (!field) return;
+            field.classList.add('is-invalid', 'input-error');
+            field.setAttribute('aria-invalid', 'true');
+            const error = document.querySelector(`[data-error-for="${field.name}"]`);
+            if (error) error.textContent = message || '';
+        }
+
+        function clearFieldError(field) {
+            if (!field) return;
+            field.classList.remove('is-invalid', 'input-error');
+            field.removeAttribute('aria-invalid');
+            const error = document.querySelector(`[data-error-for="${field.name}"]`);
+            if (error) error.textContent = '';
+        }
+
+        function validarEscolaVinculada() {
+            if (!form.escola_id.value) {
+                setFieldError(form.escola_id, 'A turma deve ser vinculada a uma escola para ser salva.');
+                form.escola_id.focus();
+                return false;
+            }
+            clearFieldError(form.escola_id);
+            return true;
+        }
+
+        async function load() {
+            const l = await api('lookups');
+            form.escola_id.innerHTML = '<option value="">Selecione uma escola</option>' + l.escolas.map(e => `<option value="${e.id}">${esc(e.nome)}</option>`).join('');
+            form.professor_id.innerHTML = '<option value="">Selecione</option>' + l.professores.map(p => `<option value="${p.id}">${esc(p.nome)}</option>`).join('');
+            if (id) {
+                title.textContent = 'EDITAR TURMA';
+                const r = await api('turmas/' + id);
+                Object.entries(r.item).forEach(([k, v]) => { if (form[k]) form[k].value = v ?? ''; });
+            }
+        }
+
+        form.escola_id.addEventListener('change', () => validarEscolaVinculada());
+
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            if (!validarEscolaVinculada()) {
+                flash('A turma deve ser vinculada a uma escola para ser salva.', 'error');
+                return;
+            }
+            try {
+                await api(id ? 'turmas/' + id : 'turmas', { method: id ? 'PUT' : 'POST', body: formData(form) });
+                location.href = 'turmas.html';
+            } catch (err) {
+                if (String(err.message || '').toLowerCase().includes('escola')) {
+                    setFieldError(form.escola_id, err.message);
+                }
+                flash(err.message, 'error');
+            }
+        });
+
+        requireAdmin().then(load);
     </script>
 </body>
 </html>

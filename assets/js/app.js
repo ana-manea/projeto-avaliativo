@@ -1,6 +1,5 @@
 /**
  * SISTEMA AVALIA - JavaScript Principal MVC
- * Visual/fluxo compatível com o sistema antigo, com modais e wizard de avaliação.
  */
 (function () {
     'use strict';
