@@ -8,7 +8,7 @@
 !.env.example
 
 # Uploads de usuários
-/public/uploads/*
+/public/uploads/
 !/public/uploads/.gitkeep
 !/public/uploads/avatars/.gitkeep
 
@@ -17,11 +17,18 @@
 *.log
 /cache/
 /tmp/
+*.cache
+*.tmp
+*.pid
 
 # Builds
 /dist/
 /build/
 /coverage/
+
+# Dependências lock
+composer.lock
+package-lock.json
 
 # IDE / SO
 .vscode/
