@@ -1,0 +1,64 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Usuário - Avalia</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="container page">
+        <div class="page-actions">
+            <div>
+                <h1 id="title">NOVO USUÁRIO</h1>
+                <p class="text-muted">Criação/edição em tela separada.</p>
+            </div>
+            <a class="btn btn-secondary" href="usuarios.html">Voltar</a>
+        </div>
+        <form id="form" class="card">
+            <div class="card-body">
+                <input type="hidden" name="id">
+                <div class="form-grid-2">
+                    <label>Nome completo<input class="form-control" name="nome_completo" required></label>
+                    <label>Usuário<input class="form-control" name="usuario" required></label>
+                    <label>Senha<input class="form-control" name="senha" type="password" minlength="6" placeholder="mínimo 6 caracteres"></label>
+                    <label>Tipo
+                        <select class="form-control" name="nivel">
+                            <option value="aluno">Aluno</option>
+                            <option value="professor">Professor</option>
+                            <option value="moderador">Moderador</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </label>
+                    <label>CPF/CNPJ
+                        <input class="form-control" name="cpf_cnpj" id="cpf_cnpj" maxlength="18" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00 ou 00.000.000/0000-00">
+                        <small class="text-muted">Será validado localmente e pela API Invertexto antes de salvar.</small>
+                    </label>
+                    <label>Email<input class="form-control" name="email" type="email"></label>
+                    <label>Telefone<input class="form-control" name="telefone"></label>
+                    <label>Matrícula (aluno)<input class="form-control" name="matricula"></label>
+                    <label>Escola
+                        <select class="form-control" name="escola_id">
+                            <option value="">Selecione</option>
+                        </select>
+                    </label>
+                    <label>Turma (aluno)
+                        <select class="form-control" name="turma_id">
+                            <option value="">Selecione</option>
+                        </select>
+                    </label>
+                    <label>Instituição (professor)<input class="form-control" name="instituicao"></label>
+                </div>
+                <button class="btn btn-primary mt-3">Salvar</button>
+            </div>
+        </form>
+    </main>
+    
+    <script src="../assets/js/frontend.js"></script>
+    <script src="js/usuarios.js"></script>
+</body>
+</html>
