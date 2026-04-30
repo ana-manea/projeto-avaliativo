@@ -1,0 +1,30 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Escolas - Avalia</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="container page">
+        <div class="page-actions">
+            <div>
+                <h1>ESCOLAS</h1>
+                <p class="text-muted">Cadastro com ViaCEP, BrasilAPI CNPJ e validação Invertexto.</p>
+            </div>
+            <a class="btn btn-primary" href="escola-form.html">+ Nova Escola</a>
+        </div>
+        <div id="lista"></div>
+    </main>
+    
+    <script src="../assets/js/frontend.js"></script>
+    <script>
+        let items=[];async function load(){items=(await api('escolas')).items||[];render()}function render(){lista.innerHTML=table(['Nome','CNPJ','Endereço','Telefone','Email','Turmas','Alunos','Status','Ações'],items.map(e=>`<tr><td>${esc(e.nome)}</td><td>${esc(e.cnpj||'-')}</td><td>${esc(e.endereco||'-')}</td><td>${esc(e.telefone||'-')}</td><td>${esc(e.email||'-')}</td><td>${e.turmas||0}</td><td>${e.alunos||0}</td><td>${e.ativo==1?statusBadge('ativo'):statusBadge('inativo')}</td><td><a class="btn btn-sm btn-secondary" href="escola-form.html?id=${e.id}">Editar</a> <button class="btn btn-sm btn-warning" onclick="statusEscola(${e.id},${e.ativo==1?0:1})">${e.ativo==1?'Desativar':'Ativar'}</button> <button class="btn btn-sm btn-danger" onclick="del(${e.id})">Excluir</button></td></tr>`))}async function statusEscola(id,ativo){await api('escolas/'+id+'/status',{method:'POST',body:{ativo}});flash(ativo?'Escola ativada.':'Escola desativada.');load()}async function del(id){const item=items.find(x=>Number(x.id)===Number(id));if(item&&Number(item.ativo)===1)return flash('Desative a escola antes de excluir.','error');if(await confirmAction('Excluir definitivamente esta escola inativa? Esta ação não pode ser desfeita.','Excluir escola')){try{await api('escolas/'+id,{method:'DELETE'});flash('Escola excluída.');load()}catch(e){flash(e.message,'error')}}}requireAdmin().then(load);
+    </script>
+</body>
+</html>

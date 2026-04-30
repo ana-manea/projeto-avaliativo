@@ -1,0 +1,40 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Disciplina - Avalia</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="container page">
+        <div class="page-actions">
+            <h1 id="title">NOVA DISCIPLINA</h1>
+            <a class="btn btn-secondary" href="disciplinas.html">Voltar</a>
+        </div>
+        <form id="form" class="card">
+            <div class="card-body">
+                <label>Nome<input class="form-control" name="nome" required></label>
+                <label>Código<input class="form-control" name="codigo"></label>
+                <label>Descrição<textarea class="form-control" name="descricao"></textarea></label>
+                <label>Status
+                    <select class="form-control" name="ativo">
+                        <option value="1">Ativa</option>
+                        <option value="0">Inativa</option>
+                    </select>
+                </label>
+                <button class="btn btn-primary mt-3">Salvar</button>
+            </div>
+        </form>
+    </main>
+    
+    <script src="../assets/js/frontend.js"></script>
+    <script>
+        const id=new URLSearchParams(location.search).get('id');async function load(){if(id){title.textContent='EDITAR DISCIPLINA';const r=await api('disciplinas/'+id);Object.entries(r.item).forEach(([k,v])=>{if(form[k])form[k].value=v??''})}}form.addEventListener('submit',async e=>{e.preventDefault();try{await api(id?'disciplinas/'+id:'disciplinas',{method:id?'PUT':'POST',body:formData(form)});location.href='disciplinas.html';}catch(err){flash(err.message,'error')}});requireAdmin().then(load);
+    </script>
+</body>
+</html>

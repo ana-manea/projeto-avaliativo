@@ -1,0 +1,47 @@
+<!Doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Turma - Avalia</title>
+    <link rel="icon" href="../assets/favicon/favicon.ico?v=2" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png?v=2">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <div data-app-header></div>
+    <main class="container page">
+        <div class="page-actions">
+            <h1 id="title">NOVA TURMA</h1>
+            <a class="btn btn-secondary" href="turmas.html">Voltar</a>
+        </div>
+        <form id="form" class="card">
+            <div class="card-body">
+                <div class="form-grid-2">
+                    <label>Nome<input class="form-control" name="nome" required></label>
+                    <label>Escola<select class="form-control" name="escola_id"></select></label>
+                    <label>Série/Ano<input class="form-control" name="serie_ano"></label>
+                    <label>Turno<input class="form-control" name="turno"></label>
+                    <label>Ano letivo<input class="form-control" name="ano_letivo" value="2026"></label>
+                    <label>Capacidade<input class="form-control" type="number" name="capacidade_maxima"></label>
+                    <label>Professor responsável<select class="form-control" name="professor_id"></select></label>
+                    <label>Sala<input class="form-control" name="sala"></label>
+                    <label>Status
+                        <select class="form-control" name="ativo">
+                            <option value="1">Ativa</option>
+                            <option value="0">Inativa</option>
+                        </select>
+                    </label>
+                </div>
+                <button class="btn btn-primary mt-3">Salvar</button>
+            </div>
+        </form>
+    </main>
+    
+    <script src="../assets/js/frontend.js"></script>
+    <script>
+        const id=new URLSearchParams(location.search).get('id');async function load(){const l=await api('lookups');form.escola_id.innerHTML='<option value="">Selecione</option>'+l.escolas.map(e=>`<option value="${e.id}">${esc(e.nome)}</option>`).join('');form.professor_id.innerHTML='<option value="">Selecione</option>'+l.professores.map(p=>`<option value="${p.id}">${esc(p.nome)}</option>`).join('');if(id){title.textContent='EDITAR TURMA';const r=await api('turmas/'+id);Object.entries(r.item).forEach(([k,v])=>{if(form[k])form[k].value=v??''})}}form.addEventListener('submit',async e=>{e.preventDefault();try{await api(id?'turmas/'+id:'turmas',{method:id?'PUT':'POST',body:formData(form)});location.href='turmas.html'}catch(err){flash(err.message,'error')}});requireAdmin().then(load);
+    </script>
+</body>
+</html>
