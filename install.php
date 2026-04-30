@@ -32,10 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->exec($sql);
 
         $env = "APP_ENV=local\n\n" .
-            "MYSQLHOST={$host}\n" .
-            "MYSQLDATABASE={$dbName}\n" .
-            "MYSQLUSER={$user}\n" .
-            "MYSQLPASSWORD={$pass}\n";
+            "DB_HOST={$host}\n" .
+            "DB_NAME={$dbName}\n" .
+            "DB_USER={$user}\n" .
+            "DB_PASS={$pass}\n" .
+            "\nINVERTEXTO_TOKEN=" . ($_POST["invertexto_token"] ?? "") . "\n";
         file_put_contents(__DIR__ . '/.env', $env);
         
         $ok = true;
@@ -140,6 +141,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input name="user" value="<?= h($_POST['user'] ?? $defaultUser) ?>" required>
         <label>Senha do MySQL</label>
         <input name="pass" type="password" value="<?= h($_POST['pass'] ?? $defaultPass) ?>">
+        <label>Token Invertexto (opcional)</label>
+        <input name="invertexto_token" value="<?= h($_POST['invertexto_token'] ?? '') ?>" placeholder="Cole aqui o token da API Invertexto">
         <button type="submit">Criar/carregar banco_avalia</button>
       </form>
     <?php endif; ?>
